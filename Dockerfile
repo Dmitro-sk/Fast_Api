@@ -3,7 +3,10 @@ RUN pip install poetry
 WORKDIR /app
 COPY pyproject.toml poetry.lock* ./
 RUN poetry config virtualenvs.create false && poetry install --no-root && pip install email-validator
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 COPY . .
+
 
 # Додаємо корінь /app до шляхів пошуку модулів
 ENV PYTHONPATH=/app

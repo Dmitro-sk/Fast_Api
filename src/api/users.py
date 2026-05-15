@@ -1,38 +1,20 @@
-from fastapi import APIRouter, HTTPException
-from src.schemas.user import UserCreate, UserUpdate, UserResponse
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from src.database import get_async_session
+from src.models import User
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(prefix="/users", tags=["Users"])
 
-# Емуляція БД
-users_db = {}
-user_id_counter = 1
-
-@router.post("/", response_model=UserResponse)
-def create_user(user: UserCreate):
-    global user_id_counter
-    new_user = {**user.model_dump(), "id": user_id_counter}
-    users_db[user_id_counter] = new_user
-    user_id_counter += 1
+@router.post("/")
+async def create_user(username: str, email: str, password: str, db: AsyncSession = Depends(get_async_session)):
+    new_user = User(username=username, email=email, password=password)
+    db.add(new_user)
+    await db.commit()
+    await db.refresh(new_user)
     return new_user
 
-@router.get("/{user_id}", response_model=UserResponse)
-def get_user(user_id: int):
-    if user_id not in users_db:
-        raise HTTPException(status_code=404, detail="User not found")
-    return users_db[user_id]
-
-@router.put("/{user_id}", response_model=UserResponse)
-def update_user(user_id: int, user_update: UserUpdate):
-    if user_id not in users_db:
-        raise HTTPException(status_code=404, detail="User not found")
-    stored_user_data = users_db[user_id]
-    updated_user = {**stored_user_data, **user_update.model_dump(exclude_unset=True)}
-    users_db[user_id] = updated_user
-    return updated_user
-
-@router.delete("/{user_id}")
-def delete_user(user_id: int):
-    if user_id not in users_db:
-        raise HTTPException(status_code=404, detail="User not found")
-    del users_db[user_id]
-    return {"message": "User deleted successfully"}
+@router.get("/")
+async def get_users(db: AsyncSession = Depends(get_async_session)):
+    result = await db.execute(select(User))
+    return result.scalars().all()
