@@ -1,14 +1,14 @@
 FROM python:3.12-slim
-RUN pip install poetry
-WORKDIR /app
-COPY pyproject.toml poetry.lock* ./
-RUN poetry config virtualenvs.create false && poetry install --no-root && pip install email-validator
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
 
-
-# Додаємо корінь /app до шляхів пошуку модулів
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 
-CMD ["python", "src/main.py"]
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+ENTRYPOINT ["sh", "./entrypoint.sh"]

@@ -1,31 +1,20 @@
 import uvicorn
-from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from src.api.motorcycles import router as moto_router
-from src.api.users import router as user_router
-from src.database import engine
-from src.models import Base
+from src.api import categories, motorcycles, profiles, teams, users
 
-# 1. Налаштовуємо створення таблиць через Lifespan
-@asynccontextmanager
-async def lifespan(_: FastAPI):
-    # Цей блок виконується при запуску додатка
-    async with engine.begin() as conn:
-        # Створюємо всі таблиці в базі даних автоматично
-        await conn.run_sync(Base.metadata.create_all)
-    yield
-    # Тут можна додати логіку при вимкненні (якщо треба)
+app = FastAPI(title="RaceHub API")
 
-# 2. Створюємо додаток з підтримкою lifespan
-app = FastAPI(
-    title="RaceHub API",
-    lifespan=lifespan
-)
+app.include_router(users.router)
+app.include_router(profiles.router)
+app.include_router(categories.router)
+app.include_router(teams.router)
+app.include_router(motorcycles.router)
 
-# 3. Підключаємо роутери
-app.include_router(user_router)
-app.include_router(moto_router)
+
+@app.get("/")
+async def read_root() -> dict[str, str]:
+    return {"status": "ok", "message": "RaceHub API is running"}
 
 
 if __name__ == "__main__":

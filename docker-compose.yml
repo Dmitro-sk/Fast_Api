@@ -5,14 +5,25 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: user
+      DB_PASS: password
+      DB_NAME: fastapi_db
     depends_on:
       - db
 
   db:
     image: postgres:15
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=fastapi_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: fastapi_db
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
