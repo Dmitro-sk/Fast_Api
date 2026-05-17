@@ -1,91 +1,97 @@
-Команди для виконання Лаби 2:
-    1. docker compose build
-    2. docker compose up -d
-    3. docker ps
-    4. docker exec fastapi-lab1-web-1 pip list
-    ```
+Команди для виконання лабораторних 2-4
 
-ПОСЛІДОВНІСТЬ КОМАНД (ЛАБА 2):
+Лаба 2: Docker + FastAPI + PostgreSQL
 
-1. Збірка образу:
-> docker compose build
-(Результат: ✔ Image fastapi-lab1-web Built)
+1. Перейти в корінь проєкту:
+   cd C:\Users\Адмін\fastapi-lab1
 
-2. Запуск сервісів:
-> docker compose up -d
-(Результат: [+] up 19/19)
- ✔ Image postgres:15            Pulled                                                                                                                   57.1s
- ✔ Network fastapi-lab1_default Created                                                                                                                   0.6s
- ✔ Container fastapi-lab1-db-1  Started                                                                                                                  27.0s
- ✔ Container fastapi-lab1-web-1 Started                                                                                                                  28.1s
+2. Зібрати Docker-образ FastAPI:
+   docker compose build
 
-What's next:
-    Filter, search, and stream logs from all your Compose services
-    in one place with Docker Desktop's Logs view. docker-desktop://dashboard/logs
+3. Запустити два контейнери: web і db:
+   docker compose up -d
 
-3. Перевірка запущених контейнерів:
-> docker ps
-(Результат: CONTAINER ID   IMAGE              COMMAND                  CREATED         STATUS         PORTS                                         NAMES
-ac0843af38f1   fastapi-lab1-web   "uvicorn src.main:ap…"   2 minutes ago   Up 2 minutes   0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp   fastapi-lab1-web-1
-220ff18c48a1   postgres:15        "docker-entrypoint.s…"   2 minutes ago   Up 2 minutes   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp   fastapi-lab1-db-1)
+4. Перевірити, що обидва контейнери запущені:
+   docker ps
 
-4. Список бібліотек всередині контейнера:
-> docker exec fastapi-lab1-web-1 pip list
-(Результат: Package  Version)
------------------- -----------
-annotated-doc      0.0.4
-annotated-types    0.7.0
-anyio              4.13.0
-backports.zstd     1.5.0
-build              1.5.0
-CacheControl       0.14.4
-certifi            2026.4.22
-cffi               2.0.0
-charset-normalizer 3.4.7
-cleo               2.1.0
-click              8.3.3
-crashtest          0.4.1
-cryptography       48.0.0
-distlib            0.4.0
-dulwich            1.2.1
-fastapi            0.136.1
-fastjsonschema     2.21.2
-filelock           3.29.0
-findpython         0.8.0
-h11                0.16.0
-httpcore           1.0.9
-httpx              0.28.1
-idna               3.13
-installer          1.0.1
-jaraco.classes     3.4.0
-jaraco.context     6.1.2
-jaraco.functools   4.4.0
-jeepney            0.9.0
-keyring            25.7.0
-more-itertools     11.0.2
-msgpack            1.1.2
-packaging          26.2
-pbs-installer      2026.5.10
-pip                25.0.1
-pkginfo            1.12.1.2
-platformdirs       4.9.6
-poetry             2.4.1
-poetry-core        2.4.0
-pycparser          3.0
-pydantic           2.13.4
-pydantic_core      2.46.4
-pyproject_hooks    1.2.0
-python-discovery   1.3.1
-RapidFuzz          3.14.5
-requests           2.34.1
-requests-toolbelt  1.0.0
-SecretStorage      3.5.0
-shellingham        1.5.4
-starlette          1.0.0
-tomlkit            0.15.0
-trove-classifiers  2026.5.7.17
-typing_extensions  4.15.0
-typing-inspection  0.4.2
-urllib3            2.7.0
-uvicorn            0.46.0
-virtualenv         21.3.3
+5. Переглянути логи FastAPI-контейнера:
+   docker compose logs -f web
+
+6. Перевірити встановлені бібліотеки всередині контейнера:
+   docker exec fastapi-lab1-web-1 pip list
+
+7. Перевірити автоперезавантаження сервера:
+   - відкрити будь-який файл у папці src
+   - змінити код
+   - зберегти файл
+   - у логах web має з'явитися повідомлення про reload
+
+У docker-compose.yml робоча папка підмонтована так:
+   .:/app
+
+Сервер запускається з автоперезавантаженням через entrypoint.sh:
+   uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+
+
+Лаба 3: CRUD для користувачів
+
+1. Запустити проєкт:
+   docker compose up -d
+
+2. Відкрити Swagger:
+   http://localhost:8000/docs
+
+3. Перевірити POST /users/:
+   curl -X POST http://localhost:8000/users/ ^
+     -H "Content-Type: application/json" ^
+     -d "{\"username\":\"testuser\",\"email\":\"test@example.com\",\"password\":\"secret123\"}"
+
+4. Перевірити GET /users/:
+   curl http://localhost:8000/users/
+
+5. Перевірити PUT /users/1:
+   curl -X PUT http://localhost:8000/users/1 ^
+     -H "Content-Type: application/json" ^
+     -d "{\"username\":\"updateduser\"}"
+
+6. Перевірити DELETE /users/1:
+   curl -X DELETE http://localhost:8000/users/1
+
+Такі самі CRUD-ручки є для:
+   /profiles/
+   /categories/
+   /teams/
+   /motorcycles/
+
+
+Лаба 4: PostgreSQL + Alembic + async SQLAlchemy
+
+1. Запустити базу та API:
+   docker compose up -d
+
+2. Міграції виконуються автоматично в entrypoint.sh:
+   alembic upgrade head
+
+3. За потреби виконати міграції вручну:
+   docker compose exec web alembic upgrade head
+
+4. Перевірити таблиці в PostgreSQL:
+   docker compose exec db psql -U user -d fastapi_db -c "\dt"
+
+5. Перевірити записи в таблиці users:
+   docker compose exec db psql -U user -d fastapi_db -c "SELECT * FROM users;"
+
+6. Перевірити записи в таблиці profiles:
+   docker compose exec db psql -U user -d fastapi_db -c "SELECT * FROM profiles;"
+
+7. Перевірити записи в таблиці categories:
+   docker compose exec db psql -U user -d fastapi_db -c "SELECT * FROM categories;"
+
+8. Перевірити записи в таблиці teams:
+   docker compose exec db psql -U user -d fastapi_db -c "SELECT * FROM teams;"
+
+9. Перевірити записи в таблиці motorcycles:
+   docker compose exec db psql -U user -d fastapi_db -c "SELECT * FROM motorcycles;"
+
+10. Зупинити контейнери після перевірки:
+    docker compose down

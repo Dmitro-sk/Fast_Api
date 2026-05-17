@@ -1,10 +1,21 @@
 import uvicorn
 from fastapi import FastAPI
 
-app = FastAPI()
+from src.api import categories, motorcycles, profiles, teams, users
+
+app = FastAPI(title="RaceHub API")
+
+app.include_router(users.router)
+app.include_router(profiles.router)
+app.include_router(categories.router)
+app.include_router(teams.router)
+app.include_router(motorcycles.router)
+
 
 @app.get("/")
-def read_root():
-    return {"status": "Lab 1 ", "message": "Hello"}
+async def read_root() -> dict[str, str]:
+    return {"status": "ok", "message": "RaceHub API is running"}
+
+
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("src.main:app", host="0.0.0.0", port=8000, reload=True)
