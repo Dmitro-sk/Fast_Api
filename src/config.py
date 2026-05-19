@@ -4,9 +4,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     DB_HOST: str = "db"
     DB_PORT: int = 5432
-    DB_USER: str = "user"
-    DB_PASS: str = "password"
-    DB_NAME: str = "fastapi_db"
+    DB_USER: str
+    DB_PASS: str
+    DB_NAME: str
     DB_ECHO: bool = False
 
     @property
