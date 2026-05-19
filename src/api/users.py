@@ -1,9 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.crud import motorcycles as motorcycles_crud
 from src.crud import users as users_crud
 from src.database import get_async_session
+from src.models import User
+from src.schemas.motorcycle import MotorcycleRead
 from src.schemas.user import UserCreate, UserRead, UserUpdate
+from src.security import get_current_user
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -19,6 +23,19 @@ async def create_user(
 @router.get("/", response_model=list[UserRead])
 async def read_users(db: AsyncSession = Depends(get_async_session)):
     return await users_crud.get_users(db)
+
+
+@router.get("/me", response_model=UserRead)
+async def read_current_user(current_user: User = Depends(get_current_user)):
+    return current_user
+
+
+@router.get("/me/motorcycles", response_model=list[MotorcycleRead])
+async def read_current_user_motorcycles(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_session),
+):
+    return await motorcycles_crud.get_motorcycles_by_owner(db, current_user.id)
 
 
 @router.get("/{user_id}", response_model=UserRead)

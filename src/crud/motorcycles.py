@@ -22,6 +22,13 @@ async def get_motorcycles(db: AsyncSession) -> list[Motorcycle]:
     return list(result.scalars().all())
 
 
+async def get_motorcycles_by_owner(db: AsyncSession, owner_id: int) -> list[Motorcycle]:
+    result = await db.execute(
+        select(Motorcycle).where(Motorcycle.owner_id == owner_id).order_by(Motorcycle.id),
+    )
+    return list(result.scalars().all())
+
+
 async def update_motorcycle(
     db: AsyncSession,
     motorcycle: Motorcycle,

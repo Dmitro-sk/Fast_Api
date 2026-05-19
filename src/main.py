@@ -1,10 +1,11 @@
 import uvicorn
 from fastapi import FastAPI
 
-from src.api import categories, motorcycles, profiles, teams, users
+from src.api import auth, categories, motorcycles, profiles, teams, users
 
 app = FastAPI(title="RaceHub API")
 
+app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(profiles.router)
 app.include_router(categories.router)

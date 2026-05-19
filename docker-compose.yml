@@ -11,6 +11,9 @@ services:
       DB_USER: ${DB_USER:?Set DB_USER in .env}
       DB_PASS: ${DB_PASS:?Set DB_PASS in .env}
       DB_NAME: ${DB_NAME:?Set DB_NAME in .env}
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME:-access_token}
     depends_on:
       db:
         condition: service_healthy
@@ -33,5 +36,24 @@ services:
       timeout: 3s
       retries: 10
 
+  test_db:
+    image: postgres:15
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${TEST_DB_USER:?Set TEST_DB_USER in .env}
+      POSTGRES_PASSWORD: ${TEST_DB_PASS:?Set TEST_DB_PASS in .env}
+      POSTGRES_DB: ${TEST_DB_NAME:?Set TEST_DB_NAME in .env}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
 volumes:
   postgres_data:
+  postgres_test_data:

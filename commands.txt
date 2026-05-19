@@ -89,3 +89,53 @@ Lab 4: PostgreSQL + Alembic + async SQLAlchemy
 
 7. Stop containers:
    docker compose down
+
+
+Lab 5: registration, authentication, JWT, cookies
+
+1. Start the project:
+   docker compose up -d
+
+2. Register a user in Postman:
+   Method: POST
+   URL: http://localhost:8000/auth/register
+   Body JSON:
+   {
+     "username": "labuser",
+     "email": "labuser@example.com",
+     "password": "secret123"
+   }
+
+3. Login in Postman:
+   Method: POST
+   URL: http://localhost:8000/auth/login
+   Body JSON:
+   {
+     "username": "labuser",
+     "password": "secret123"
+   }
+
+4. After login, Postman stores the HTTP-only access_token cookie.
+
+5. Check protected endpoints:
+   GET http://localhost:8000/users/me
+   GET http://localhost:8000/users/me/motorcycles
+
+6. Logout:
+   POST http://localhost:8000/auth/logout
+
+7. Do not show the cookie value, Authorization headers, real emails, or passwords in screenshots.
+
+
+Lab 6: tests with a separate PostgreSQL test database
+
+1. Start the test database:
+   docker compose up -d test_db
+
+2. Run tests inside the web container:
+   docker compose run --rm web pytest
+
+3. The tests use TEST_DB_* values from .env and override the FastAPI database dependency.
+
+4. Expected result:
+   12 passed

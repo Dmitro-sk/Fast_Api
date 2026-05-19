@@ -73,6 +73,33 @@ CRUD endpoints are available for:
 - `/teams/`
 - `/motorcycles/`
 
+Auth endpoints for lab 5:
+
+- `POST /auth/register`
+- `POST /auth/login`
+- `POST /auth/logout`
+- `GET /auth/me`
+
+Protected endpoints that require the JWT cookie:
+
+- `GET /users/me`
+- `GET /users/me/motorcycles`
+
+Passwords are stored as salted PBKDF2 hashes in PostgreSQL. The JWT is returned in an HTTP-only cookie.
+
+## Tests
+
+Lab 6 uses a separate PostgreSQL service named `test_db`.
+
+Run tests in Docker:
+
+```powershell
+docker compose up -d test_db
+docker compose run --rm web pytest
+```
+
+The tests override the application database dependency and use `TEST_DB_*` values from `.env`.
+
 ## Postman Checks
 
 For screenshots, prefer endpoints that do not expose emails, passwords, tokens, cookies, or database credentials:

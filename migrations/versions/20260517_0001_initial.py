@@ -22,7 +22,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("username", sa.String(length=50), nullable=False),
         sa.Column("email", sa.String(length=100), nullable=False),
-        sa.Column("password", sa.String(length=100), nullable=False),
+        sa.Column("password", sa.String(length=255), nullable=False),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("email"),
         sa.UniqueConstraint("username"),
@@ -69,8 +69,18 @@ def upgrade() -> None:
     op.bulk_insert(
         users,
         [
-            {"id": 1, "username": "andrii", "email": "andrii@example.com", "password": "secret123"},
-            {"id": 2, "username": "olena", "email": "olena@example.com", "password": "secret456"},
+            {
+                "id": 1,
+                "username": "andrii",
+                "email": "andrii@example.com",
+                "password": "pbkdf2_sha256$260000$060f7158b0fab874163bab919bef7dad$17299fd6f3252ff2295c86a5752b77f4c85c1617567842890e34f9659855a53b",
+            },
+            {
+                "id": 2,
+                "username": "olena",
+                "email": "olena@example.com",
+                "password": "pbkdf2_sha256$260000$667e887685f3ca4913fd1c3221508ece$8b9f8d55c8892d1ffacdf7caeb7450b6e5e20410151baa8a0037dfaa3c74a8e9",
+            },
         ],
     )
     op.bulk_insert(
