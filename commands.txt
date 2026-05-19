@@ -17,20 +17,23 @@
 5. Переглянути логи FastAPI-контейнера:
    docker compose logs -f web
 
-6. Перевірити встановлені бібліотеки всередині контейнера:
-   docker exec fastapi-lab1-web-1 pip list
+6. Перевірити залежності Poetry всередині контейнера:
+   docker compose exec web poetry show
 
-7. Перевірити автоперезавантаження сервера:
+7. Для автоперезавантаження запустити dev-compose:
+   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+
+8. Перевірити автоперезавантаження сервера:
    - відкрити будь-який файл у папці src
    - змінити код
    - зберегти файл
    - у логах web має з'явитися повідомлення про reload
 
-У docker-compose.yml робоча папка підмонтована так:
+У docker-compose.dev.yml робоча папка підмонтована так:
    .:/app
 
-Сервер запускається з автоперезавантаженням через entrypoint.sh:
-   uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+Сервер у dev-режимі запускається через Poetry:
+   poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 
 
 Лаба 3: CRUD для користувачів
@@ -38,10 +41,13 @@
 1. Запустити проєкт:
    docker compose up -d
 
-2. Відкрити Swagger:
-   http://localhost:8000/docs
+2. Перевірити запити в Postman:
+   GET http://localhost:8000/users/
+   POST http://localhost:8000/users/
+   PUT http://localhost:8000/users/1
+   DELETE http://localhost:8000/users/1
 
-3. Перевірити POST /users/:
+3. Альтернативно перевірити POST /users/ через curl:
    curl -X POST http://localhost:8000/users/ ^
      -H "Content-Type: application/json" ^
      -d "{\"username\":\"testuser\",\"email\":\"test@example.com\",\"password\":\"secret123\"}"
@@ -70,10 +76,10 @@
    docker compose up -d
 
 2. Міграції виконуються автоматично в entrypoint.sh:
-   alembic upgrade head
+   poetry run alembic upgrade head
 
 3. За потреби виконати міграції вручну:
-   docker compose exec web alembic upgrade head
+   docker compose exec web poetry run alembic upgrade head
 
 4. Перевірити таблиці в PostgreSQL:
    docker compose exec db psql -U user -d fastapi_db -c "\dt"

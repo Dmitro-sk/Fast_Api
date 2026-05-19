@@ -1,9 +1,6 @@
 #!/bin/sh
 set -e
 
-until alembic upgrade head; do
-  echo "Database is not ready yet. Retrying in 2 seconds..."
-  sleep 2
-done
+poetry run alembic upgrade head
 
-exec uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+exec "$@"
