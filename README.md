@@ -4,6 +4,14 @@ RaceHub API is a FastAPI application with async SQLAlchemy, PostgreSQL, Alembic 
 
 ## Run with Docker
 
+Create a local environment file first:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Edit `.env` locally and keep it private. Do not commit `.env` and do not show it in screenshots.
+
 Build and start the regular stack:
 
 ```powershell
@@ -67,7 +75,24 @@ CRUD endpoints are available for:
 
 ## Postman Checks
 
-The repository includes Postman screenshots for the lab checks:
+For screenshots, prefer endpoints that do not expose emails, passwords, tokens, cookies, or database credentials:
+
+- `GET http://localhost:8000/teams/`
+- `GET http://localhost:8000/categories/`
+- `GET http://localhost:8000/motorcycles/`
+
+If you screenshot `/users/`, hide real emails and any password-like fields. Also hide these items anywhere they appear:
+
+- `.env`
+- `DB_PASS`
+- `POSTGRES_PASSWORD`
+- database connection strings
+- `Authorization` headers
+- `Cookie` headers
+- API keys or tokens
+- private hostnames or IP addresses that are not `localhost`
+
+The repository includes Postman screenshots for the lab checks. Make sure screenshots do not reveal sensitive values before pushing them:
 
 ![Postman report](postman_report.png)
 
