@@ -1,0 +1,103 @@
+Команди для виконання лабораторних 2-4
+
+Лаба 2: Docker + FastAPI + PostgreSQL
+
+1. Перейти в корінь проєкту:
+   cd C:\Users\Адмін\fastapi-lab1
+
+2. Зібрати Docker-образ FastAPI:
+   docker compose build
+
+3. Запустити два контейнери: web і db:
+   docker compose up -d
+
+4. Перевірити, що обидва контейнери запущені:
+   docker ps
+
+5. Переглянути логи FastAPI-контейнера:
+   docker compose logs -f web
+
+6. Перевірити залежності Poetry всередині контейнера:
+   docker compose exec web poetry show
+
+7. Для автоперезавантаження запустити dev-compose:
+   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+
+8. Перевірити автоперезавантаження сервера:
+   - відкрити будь-який файл у папці src
+   - змінити код
+   - зберегти файл
+   - у логах web має з'явитися повідомлення про reload
+
+У docker-compose.dev.yml робоча папка підмонтована так:
+   .:/app
+
+Сервер у dev-режимі запускається через Poetry:
+   poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+
+
+Лаба 3: CRUD для користувачів
+
+1. Запустити проєкт:
+   docker compose up -d
+
+2. Перевірити запити в Postman:
+   GET http://localhost:8000/users/
+   POST http://localhost:8000/users/
+   PUT http://localhost:8000/users/1
+   DELETE http://localhost:8000/users/1
+
+3. Альтернативно перевірити POST /users/ через curl:
+   curl -X POST http://localhost:8000/users/ ^
+     -H "Content-Type: application/json" ^
+     -d "{\"username\":\"testuser\",\"email\":\"test@example.com\",\"password\":\"secret123\"}"
+
+4. Перевірити GET /users/:
+   curl http://localhost:8000/users/
+
+5. Перевірити PUT /users/1:
+   curl -X PUT http://localhost:8000/users/1 ^
+     -H "Content-Type: application/json" ^
+     -d "{\"username\":\"updateduser\"}"
+
+6. Перевірити DELETE /users/1:
+   curl -X DELETE http://localhost:8000/users/1
+
+Такі самі CRUD-ручки є для:
+   /profiles/
+   /categories/
+   /teams/
+   /motorcycles/
+
+
+Лаба 4: PostgreSQL + Alembic + async SQLAlchemy
+
+1. Запустити базу та API:
+   docker compose up -d
+
+2. Міграції виконуються автоматично в entrypoint.sh:
+   poetry run alembic upgrade head
+
+3. За потреби виконати міграції вручну:
+   docker compose exec web poetry run alembic upgrade head
+
+4. Перевірити таблиці в PostgreSQL:
+   docker compose exec db psql -U user -d fastapi_db -c "\dt"
+
+5. Перевірити записи в таблиці users:
+   docker compose exec db psql -U user -d fastapi_db -c "SELECT * FROM users;"
+
+6. Перевірити записи в таблиці profiles:
+   docker compose exec db psql -U user -d fastapi_db -c "SELECT * FROM profiles;"
+
+7. Перевірити записи в таблиці categories:
+   docker compose exec db psql -U user -d fastapi_db -c "SELECT * FROM categories;"
+
+8. Перевірити записи в таблиці teams:
+   docker compose exec db psql -U user -d fastapi_db -c "SELECT * FROM teams;"
+
+9. Перевірити записи в таблиці motorcycles:
+   docker compose exec db psql -U user -d fastapi_db -c "SELECT * FROM motorcycles;"
+
+10. Зупинити контейнери після перевірки:
+    docker compose down

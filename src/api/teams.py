@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.crud import teams as teams_crud
@@ -13,7 +14,14 @@ async def create_team(
     team_in: TeamCreate,
     db: AsyncSession = Depends(get_async_session),
 ):
-    return await teams_crud.create_team(db, team_in)
+    try:
+        return await teams_crud.create_team(db, team_in)
+    except IntegrityError as exc:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Team with this name already exists",
+        ) from exc
 
 
 @router.get("/", response_model=list[TeamRead])
@@ -38,7 +46,14 @@ async def update_team(
     team = await teams_crud.get_team(db, team_id)
     if team is None:
         raise HTTPException(status_code=404, detail="Team not found")
-    return await teams_crud.update_team(db, team, team_in)
+    try:
+        return await teams_crud.update_team(db, team, team_in)
+    except IntegrityError as exc:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Team with this name already exists",
+        ) from exc
 
 
 @router.delete("/{team_id}", status_code=status.HTTP_204_NO_CONTENT)
