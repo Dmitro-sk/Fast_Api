@@ -14,6 +14,7 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry install --no-interaction --no-ansi --no-root
 
 COPY . .
+RUN sed -i 's/\r$//' entrypoint.sh
 
 ENTRYPOINT ["sh", "./entrypoint.sh"]
 CMD ["poetry", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
